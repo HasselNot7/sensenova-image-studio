@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  Alert,
   Button,
   Card,
   Chip,
   Modal,
+  Spinner,
   Tooltip,
   toast,
 } from "@heroui/react";
@@ -15,16 +17,69 @@ import { BlurText } from "@/components/reactbits/BlurText";
 import { CountUp } from "@/components/reactbits/CountUp";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { buildFilename, extensionForDataUrl, triggerDownload } from "@/lib/download";
-import type { HistoryItem } from "@/lib/history";
+import { loadHistoryImage, type HistoryMeta } from "@/lib/history";
 
 interface HistoryPanelProps {
-  items: HistoryItem[];
+  items: HistoryMeta[];
   onDelete: (id: string) => void;
   onClear: () => void;
 }
 
+type PreviewStatus = "loading" | "ready" | "error";
+
 export function HistoryPanel({ items, onDelete, onClear }: HistoryPanelProps) {
-  const [preview, setPreview] = useState<HistoryItem | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewStatus, setPreviewStatus] = useState<PreviewStatus>("loading");
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const previewMeta = items.find((item) => item.id === previewId) ?? null;
+  const previewOpen = previewId !== null && previewMeta !== null;
+
+  const openPreview = (id: string) => {
+    setPreviewId(id);
+    setPreviewStatus("loading");
+    setPreviewImage(null);
+    setPreviewError(null);
+    void loadHistoryImage(id)
+      .then((image) => {
+        if (image === null) {
+          setPreviewStatus("error");
+          setPreviewError("原图数据缺失（可能已被清理或迁移失败）");
+        } else {
+          setPreviewImage(image);
+          setPreviewStatus("ready");
+        }
+      })
+      .catch((error: unknown) => {
+        setPreviewStatus("error");
+        setPreviewError(error instanceof Error ? error.message : String(error));
+      });
+  };
+
+  const closePreview = () => setPreviewId(null);
+
+  const downloadImage = async (meta: HistoryMeta, image: string) => {
+    triggerDownload(
+      image,
+      buildFilename(meta.model, meta.ts, extensionForDataUrl(image)),
+    );
+  };
+
+  const downloadFromList = async (meta: HistoryMeta) => {
+    try {
+      const image = await loadHistoryImage(meta.id);
+      if (image === null) {
+        toast.danger("无法下载", { description: "该记录的原图数据缺失" });
+        return;
+      }
+      await downloadImage(meta, image);
+    } catch (error) {
+      toast.danger("下载失败", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
 
   return (
     <SpotlightCard className="h-full">
@@ -70,16 +125,16 @@ export function HistoryPanel({ items, onDelete, onClear }: HistoryPanelProps) {
                   className="size-14 shrink-0 cursor-pointer overflow-hidden rounded-lg border border-border bg-surface-secondary"
                   title="点击回看"
                   type="button"
-                  onClick={() => setPreview(item)}
+                  onClick={() => openPreview(item.id)}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={item.prompt} className="size-full object-cover" src={item.image} />
+                  <img alt={item.prompt} className="size-full object-cover" src={item.thumb} />
                 </button>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <p
                     className="cursor-pointer truncate text-sm"
                     title="点击回看"
-                    onClick={() => setPreview(item)}
+                    onClick={() => openPreview(item.id)}
                   >
                     {item.prompt}
                   </p>
@@ -100,12 +155,7 @@ export function HistoryPanel({ items, onDelete, onClear }: HistoryPanelProps) {
                       isIconOnly
                       size="sm"
                       variant="tertiary"
-                      onPress={() =>
-                        triggerDownload(
-                          item.image,
-                          buildFilename(item.model, item.ts, extensionForDataUrl(item.image)),
-                        )
-                      }
+                      onPress={() => void downloadFromList(item)}
                     >
                       <ArrowDownToLine className="size-4" />
                     </Button>
@@ -136,7 +186,7 @@ export function HistoryPanel({ items, onDelete, onClear }: HistoryPanelProps) {
         )}
       </Card.Content>
 
-      <Modal.Backdrop isOpen={preview !== null} onOpenChange={(open) => !open && setPreview(null)}>
+      <Modal.Backdrop isOpen={previewOpen} onOpenChange={(open) => !open && closePreview()}>
         <Modal.Container size="lg" placement="auto">
           <Modal.Dialog className="rounded-card">
             <Modal.CloseTrigger />
@@ -144,22 +194,39 @@ export function HistoryPanel({ items, onDelete, onClear }: HistoryPanelProps) {
               <Modal.Heading>历史生成结果</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="flex flex-col gap-3">
-              {preview ? (
+              {previewMeta ? (
                 <>
                   <div className="overflow-hidden rounded-xl border border-border bg-default/40">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      alt={preview.prompt}
-                      className="max-h-[60vh] w-full object-contain"
-                      src={preview.image}
-                    />
+                    {previewStatus === "loading" ? (
+                      <div className="flex aspect-[4/3] w-full items-center justify-center gap-2 text-sm text-muted">
+                        <Spinner size="sm" />
+                        正在载入原图…
+                      </div>
+                    ) : previewStatus === "error" ? (
+                      <div className="flex aspect-[4/3] w-full items-center justify-center px-6">
+                        <Alert status="warning">
+                          <Alert.Indicator />
+                          <Alert.Content>
+                            <Alert.Title>原图不可用</Alert.Title>
+                            <Alert.Description>{previewError}</Alert.Description>
+                          </Alert.Content>
+                        </Alert>
+                      </div>
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        alt={previewMeta.prompt}
+                        className="max-h-[60vh] w-full object-contain"
+                        src={previewImage ?? ""}
+                      />
+                    )}
                   </div>
                   <div className="flex flex-col gap-1 text-sm">
                     <p>
                       <span className="text-muted">提示词：</span>
-                      {preview.prompt}
+                      {previewMeta.prompt}
                     </p>
-                    {Object.entries(preview.params).map(([key, value]) => {
+                    {Object.entries(previewMeta.params).map(([key, value]) => {
                       const text = String(value);
                       const isTech = /^[a-z0-9._x-]+$/.test(text);
                       return (
@@ -171,38 +238,30 @@ export function HistoryPanel({ items, onDelete, onClear }: HistoryPanelProps) {
                     })}
                     <p>
                       <span className="text-muted">模型：</span>
-                      <span className="tech">{preview.model}</span>
+                      <span className="tech">{previewMeta.model}</span>
                     </p>
                     <p>
                       <span className="text-muted">时间：</span>
-                      {new Date(preview.ts).toLocaleString("zh-CN")}
+                      {new Date(previewMeta.ts).toLocaleString("zh-CN")}
                     </p>
                   </div>
                 </>
               ) : null}
             </Modal.Body>
             <Modal.Footer className="justify-between">
-              {preview ? (
+              {previewMeta ? (
                 <>
                   <Button
+                    isDisabled={previewStatus !== "ready" || previewImage === null}
                     variant="secondary"
                     onPress={() =>
-                      triggerDownload(
-                        preview.image,
-                        buildFilename(preview.model, preview.ts, extensionForDataUrl(preview.image)),
-                      )
+                      previewImage && void downloadImage(previewMeta, previewImage)
                     }
                   >
                     <ArrowDownToLine className="size-4" />
                     下载
                   </Button>
-                  <Button
-                    variant="danger-soft"
-                    onPress={() => {
-                      onDelete(preview.id);
-                      setPreview(null);
-                    }}
-                  >
+                  <Button variant="danger-soft" onPress={() => onDelete(previewMeta.id)}>
                     <TrashBin className="size-4" />
                     删除
                   </Button>

@@ -24,7 +24,7 @@ import { ShinyText } from "@/components/reactbits/ShinyText";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ResultView } from "@/components/result-view";
 import { requestSensenovaImage } from "@/lib/api-client";
-import { createHistoryItem, type HistoryItem } from "@/lib/history";
+import { createHistoryItem, type HistoryInput } from "@/lib/history";
 import {
   approxBytesFromDataURL,
   compressImageForUpload,
@@ -54,7 +54,7 @@ const RESPONSE_FORMAT_OPTIONS = [
 ] satisfies { value: ResponseFormat; label: string; note?: string }[];
 
 interface EditPanelProps {
-  onHistoryAdd: (item: HistoryItem) => void;
+  onHistoryAdd: (item: HistoryInput) => void;
 }
 
 export function EditPanel({ onHistoryAdd }: EditPanelProps) {

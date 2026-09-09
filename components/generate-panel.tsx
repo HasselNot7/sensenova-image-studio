@@ -37,7 +37,7 @@ import {
   type OutputFormat,
   type ResponseFormat,
 } from "@/lib/models";
-import { createHistoryItem, type HistoryItem } from "@/lib/history";
+import { createHistoryItem, type HistoryInput } from "@/lib/history";
 import { buildGenerationRequest, validateGenerationParams } from "@/lib/request-builder";
 import type { ApiFailure } from "@/lib/errors";
 
@@ -53,7 +53,7 @@ const RESPONSE_FORMAT_OPTIONS = [
 ] satisfies { value: ResponseFormat; label: string; note?: string }[];
 
 interface GeneratePanelProps {
-  onHistoryAdd: (item: HistoryItem) => void;
+  onHistoryAdd: (item: HistoryInput) => void;
 }
 
 export function GeneratePanel({ onHistoryAdd }: GeneratePanelProps) {
@@ -95,7 +95,7 @@ export function GeneratePanel({ onHistoryAdd }: GeneratePanelProps) {
       if (response.ok) {
         setImageResult({ image: response.image, createdAtMs: response.created * 1000 });
         toast.success("图片生成成功", { description: "已保存到历史记录（Data-URL，可长期查看）" });
-        const params: HistoryItem["params"] = {
+        const params: HistoryInput["params"] = {
           尺寸: request.size,
           水印: request.watermark ? "开" : "关",
         };

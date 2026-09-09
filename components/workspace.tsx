@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs, Toast, Tooltip } from "@heroui/react";
+import { Tabs, Toast, Tooltip, toast } from "@heroui/react";
 import { Pencil, Sparkles } from "@gravity-ui/icons";
 import { useCallback, useEffect, useState } from "react";
 
@@ -10,10 +10,22 @@ import { GeneratePanel } from "@/components/generate-panel";
 import { HistoryPanel } from "@/components/history-panel";
 import { SettingsModal } from "@/components/settings-modal";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { loadHistory, saveHistory, type HistoryItem } from "@/lib/history";
+import {
+  addHistoryEntry,
+  clearAllHistory,
+  loadHistoryList,
+  migrateLegacyHistory,
+  removeHistoryEntry,
+  type HistoryInput,
+  type HistoryMeta,
+} from "@/lib/history";
+
+function reasonOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
 export function Workspace() {
-  const [items, setItems] = useState<HistoryItem[]>(() => loadHistory());
+  const [items, setItems] = useState<HistoryMeta[]>([]);
   const [keyStatus, setKeyStatus] = useState<{ configured: boolean; source: "session" | "env" | null } | null>(
     null,
   );
@@ -36,42 +48,65 @@ export function Workspace() {
     refreshKeyStatus();
   }, [refreshKeyStatus]);
 
-  const persist = useCallback((next: HistoryItem[]) => {
-    const complete = saveHistory(next);
-    return complete;
+  // 启动：一次性迁移旧 localStorage → IndexedDB，再加载列表（仅元数据+缩略图）。
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const migration = await migrateLegacyHistory();
+      if (cancelled) {
+        return;
+      }
+      if (migration.error) {
+        toast.warning("历史记录迁移未完成", { description: migration.error });
+      } else if (migration.migrated > 0) {
+        toast.success(`已迁移 ${migration.migrated} 条历史记录`, {
+          description: "旧数据已升级为 IndexedDB 存储，重启后仍可显示",
+        });
+      }
+      try {
+        const list = await loadHistoryList();
+        if (!cancelled) {
+          setItems(list);
+        }
+      } catch (error) {
+        console.error("历史记录读取失败", error);
+        toast.danger(`历史记录读取失败：${reasonOf(error)}`);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const handleHistoryAdd = useCallback(
-    (item: HistoryItem) => {
-      setItems((prev) => {
-        const next = [item, ...prev];
-        const complete = persist(next);
-        if (!complete) {
-          const trimmed = next.slice(0, Math.max(0, next.length - 3));
-          persist(trimmed);
-          return trimmed;
-        }
-        return next;
-      });
-    },
-    [persist],
-  );
+  const handleHistoryAdd = useCallback(async (item: HistoryInput) => {
+    try {
+      const next = await addHistoryEntry(item);
+      setItems(next);
+    } catch (error) {
+      console.error("历史记录保存失败", error);
+      toast.danger(`历史记录保存失败：${reasonOf(error)}`);
+    }
+  }, []);
 
-  const handleDelete = useCallback(
-    (id: string) => {
-      setItems((prev) => {
-        const next = prev.filter((item) => item.id !== id);
-        persist(next);
-        return next;
-      });
-    },
-    [persist],
-  );
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      const next = await removeHistoryEntry(id);
+      setItems(next);
+    } catch (error) {
+      console.error("历史记录删除失败", error);
+      toast.danger(`历史记录删除失败：${reasonOf(error)}`);
+    }
+  }, []);
 
-  const handleClear = useCallback(() => {
-    persist([]);
-    setItems([]);
-  }, [persist]);
+  const handleClear = useCallback(async () => {
+    try {
+      await clearAllHistory();
+      setItems([]);
+    } catch (error) {
+      console.error("历史记录清空失败", error);
+      toast.danger(`历史记录清空失败：${reasonOf(error)}`);
+    }
+  }, []);
 
   return (
     <>
