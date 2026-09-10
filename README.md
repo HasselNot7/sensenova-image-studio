@@ -1,8 +1,6 @@
 # SenseNova 图像创作工作台
 
-SenseNova 图像模型的网页客户端，非官方。填提示词出图、传图改图，结果留在本地。
-
-技术栈：Next.js（App Router）+ React 19 + TypeScript + Tailwind CSS v4 + HeroUI v3。
+SenseNova 图像模型非官方网页客户端，填提示词出图、传图改图。
 
 ![文生图空态](docs/screenshots/01-generate-empty.png)
 
@@ -12,11 +10,6 @@ SenseNova 图像模型的网页客户端，非官方。填提示词出图、传�
   - `sensenova-u1-fast`：只能文生图，尺寸是固定的 11 个常量里选，返回的图片链接 1 小时过期。
   - `sensenova-u1.5-lite`：文生图 + 图片编辑，尺寸（预设或自定义）、图片格式、返回方式、提示词润色都能调。
 - 图片编辑的参考图：填公网 URL，或本地选一张图（读成 `data:image/*;base64` 再发）。
-- 上传前压缩：本地大图按长边等比缩放、重编码，减小体积；带透明通道的 PNG 不会被压成 JPEG。
-- 结果图不依赖临时链接：代理拿到上游返回后，在本地服务端把图片下载转成 Data-URL 再回前端，u1-fast 那条 1 小时链接过期也不影响。
-- 历史记录存浏览器 IndexedDB，带缩略图，关掉重开还在。
-- 密钥只在本地服务端，不进浏览器。
-- 深浅色主题，中文界面，桌面双栏、窄屏单栏。
 
 ![填好提示词和参数](docs/screenshots/02-generate-form.png)
 
@@ -76,7 +69,3 @@ npm run test    # 三个请求体的契约断言
 ## License
 
 AGPL-3.0，全文见 [LICENSE](LICENSE)。
-
-Copyright (c) 2026 HasselNot7
-
-这不是商汤官方的产品。SenseNova 的接口、名称与商标归 SenseNova 官方所有，API 用量和计费以官方平台为准。
