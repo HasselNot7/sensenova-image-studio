@@ -6,10 +6,9 @@ SenseNova 图像模型非官方网页客户端，填提示词出图、传图改�
 
 ## 能做什么
 
-- 两个模型，走 SenseNova 的图像接口（`/v1/images/generations`、`/v1/images/edits`），不是 Chat Completions：
+- 两个模型，走 SenseNova 的图像接口：
   - `sensenova-u1-fast`：只能文生图，尺寸是固定的 11 个常量里选，返回的图片链接 1 小时过期。
   - `sensenova-u1.5-lite`：文生图 + 图片编辑，尺寸（预设或自定义）、图片格式、返回方式、提示词润色都能调。
-- 图片编辑的参考图：填公网 URL，或本地选一张图（读成 `data:image/*;base64` 再发）。
 
 ![填好提示词和参数](docs/screenshots/02-generate-form.png)
 
@@ -17,7 +16,7 @@ SenseNova 图像模型非官方网页客户端，填提示词出图、传图改�
 
 前置：Node 18 以上；一个 SenseNova 平台账号（密钥在 platform.sensenova.cn 控制台创建）。
 
-1. 装依赖、起服务：
+1. 安装依赖、启动服务：
 
    ```bash
    npm install
