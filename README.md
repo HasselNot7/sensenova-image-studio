@@ -1,7 +1,7 @@
 # SenseNova 图像创作工作台
 
 SenseNova 图像模型非官方网页客户端，填提示词出图、传图改图。
-
+[在线使用](http://47.120.70.80:8080/)
 ![文生图空态](docs/screenshots/01-generate-empty.png)
 
 ## 能做什么
@@ -41,13 +41,6 @@ npm run test    # 三个请求体的契约断言
 npm run build
 npm run start        # 默认 3000，可用 PORT=xxxx 改
 ```
-
-要点：
-
-- **必须上 HTTPS**（用 Nginx/Caddy 等反代终结 TLS）。BYOK 下密钥会随请求发到本站，明文 HTTP 会被窃听。
-- **BYOK 模型**：密钥存在用户浏览器，请求经本站代理转发到 SenseNova。代理只加 `Authorization` 头透传，不落盘、不记日志、不缓存密钥。
-- 每个用户用自己的密钥和额度，本站不替你付钱、也不存任何人的密钥。
-- 不信任本站的人，可以 clone 仓库自己本地部署，密钥只进自己机器。
 - 可选：想省掉「每人各填一次」，在服务器配 `.env.local` 的 `SENSENOVA_API_KEY` 作为单用户回退（见 `.env.example`）。但那样所有访客共用你这一个 key，只适合自己或内网小圈子。
 
 ![图片编辑](docs/screenshots/03-edit-tab.png)
