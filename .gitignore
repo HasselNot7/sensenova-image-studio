@@ -47,3 +47,15 @@ next-env.d.ts
 # tauri
 /src-tauri/target/
 /src-tauri/gen/
+
+# electron
+/release/
+
+# local docs & agent configs (not published)
+/.agents/
+skills-lock.json
+opencode.json
+AGENTS.md
+CLAUDE.md
+heroui-sensenova-prompt.md
+heroui-sensenova-ui-polish.md
