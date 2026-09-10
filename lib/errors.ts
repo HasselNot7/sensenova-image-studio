@@ -9,6 +9,7 @@ const ERROR_HINTS: Record<string, string> = {
   quota_exceeded_error: "请求过于频繁或额度已用尽，自动重试后仍失败，请稍后再试。",
   internal_server_error: "服务器内部错误，请点击重试。",
   server_config_error: "服务端配置缺失，请按设置面板提示完成配置。",
+  config_error: "未提供 API 密钥。请在右上角「API 密钥」里填入你自己的 SenseNova 密钥（仅存于你的浏览器）。",
   network_error: "无法连接后端代理，请确认服务正在运行。",
   unknown_error: "发生未知错误。",
 };

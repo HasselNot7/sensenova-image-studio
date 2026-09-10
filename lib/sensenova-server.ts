@@ -1,14 +1,44 @@
 import { SENSENOVA_BASE_URL } from "@/lib/models";
-import { getRuntimeApiKey } from "@/lib/server-key";
 import type { ValidationIssue } from "@/lib/request-builder";
 
 const UPSTREAM_TIMEOUT_MS = 180_000;
 const IMAGE_DOWNLOAD_TIMEOUT_MS = 120_000;
+const MODELS_TIMEOUT_MS = 30_000;
 
 export interface ProxyError {
   type: string;
   code: string | number;
   message: string;
+}
+
+/**
+ * BYOK 取密钥：优先请求头 x-sensenova-key（浏览器带的用户密钥），
+ * 回退服务端环境变量 SENSENOVA_API_KEY（自托管单用户 / 桌面模式）。
+ * 二者都没有返回 null。密钥绝不落盘、绝不写日志。
+ */
+export function resolveApiKey(request: Request): string | null {
+  const header = request.headers.get("x-sensenova-key");
+  if (header && header.trim().length > 0) {
+    return header.trim();
+  }
+  const env = process.env.SENSENOVA_API_KEY;
+  if (env && env.trim().length > 0) {
+    return env.trim();
+  }
+  return null;
+}
+
+export function configMissingResponse(): Response {
+  return Response.json(
+    {
+      error: {
+        type: "config_error",
+        code: "missing_api_key",
+        message: "API key not provided",
+      },
+    },
+    { status: 401 },
+  );
 }
 
 export function errorBody(issue: ValidationIssue): Response {
@@ -21,20 +51,6 @@ export function errorBody(issue: ValidationIssue): Response {
       },
     },
     { status: 400 },
-  );
-}
-
-function configMissingResponse(): Response {
-  return Response.json(
-    {
-      error: {
-        type: "server_config_error",
-        code: "missing_api_key",
-        message:
-          "服务端未配置 SENSENOVA_API_KEY。请任选其一：① 在项目根目录 .env.local 写入 SENSENOVA_API_KEY=sk-xxx 并重启服务；② 打开页面右上角「设置」面板输入会话密钥（仅存服务端内存，重启失效）。密钥在 platform.sensenova.cn 控制台创建。",
-      },
-    },
-    { status: 500 },
   );
 }
 
@@ -76,8 +92,11 @@ async function downloadAsDataUrl(url: string): Promise<string> {
  * 只要响应 data[] 里出现 url，就在服务端立即下载并转为 Data-URL（b64_json），
  * 规避 u1-fast 链接仅 1 小时、u1.5-lite 链接仅 24 小时的时效问题。
  */
-export async function forwardToSensenova(endpoint: string, payload: unknown): Promise<Response> {
-  const apiKey = getRuntimeApiKey();
+export async function forwardToSensenova(
+  endpoint: string,
+  payload: unknown,
+  apiKey: string | null,
+): Promise<Response> {
   if (!apiKey) {
     return configMissingResponse();
   }
@@ -179,4 +198,59 @@ export async function forwardToSensenova(endpoint: string, payload: unknown): Pr
     created: typeof json.created === "number" ? json.created : Math.floor(Date.now() / 1000),
     data,
   });
+}
+
+/**
+ * 代理 GET /v1/models（连通测试用）。按 header 优先、env 回退取到的 Key 透传，
+ * 原样返回上游 JSON 与状态码；不下载、不转存、不记录密钥。
+ */
+export async function forwardModelsGet(apiKey: string | null): Promise<Response> {
+  if (!apiKey) {
+    return configMissingResponse();
+  }
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${SENSENOVA_BASE_URL}/models`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(MODELS_TIMEOUT_MS),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return Response.json(
+      {
+        error: {
+          type: "internal_server_error",
+          code: "proxy_fetch_failed",
+          message: `代理请求上游失败：${message}`,
+        },
+      } satisfies { error: ProxyError },
+      { status: 500 },
+    );
+  }
+
+  const status = upstream.status;
+  const text = await upstream.text();
+  let parsed: unknown = null;
+  try {
+    parsed = text.length > 0 ? JSON.parse(text) : null;
+  } catch {
+    parsed = null;
+  }
+
+  if (status < 200 || status >= 300) {
+    const body =
+      parsed && typeof parsed === "object" && "error" in parsed
+        ? parsed
+        : {
+            error: {
+              type: "internal_server_error",
+              code: String(status),
+              message: text.length > 0 ? text.slice(0, 500) : `上游返回 HTTP ${status}`,
+            },
+          };
+    return Response.json(body, { status });
+  }
+
+  return Response.json(parsed ?? {});
 }

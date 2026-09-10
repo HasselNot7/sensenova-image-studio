@@ -15,24 +15,17 @@ SenseNova 图像模型非官方网页客户端，填提示词出图、传图改�
 
 ## 快速开始
 
-前置：Node 18 以上；一个 SenseNova 平台账号。
+前置：Node 18 以上；一个 SenseNova 平台账号（密钥在 platform.sensenova.cn 控制台创建）。
 
-1. 复制 `.env.example` 为 `.env.local`，填：
-
-   ```bash
-   SENSENOVA_API_KEY=sk-xxxxxxxx
-   ```
-
-   密钥在 platform.sensenova.cn 控制台创建。
-
-2. 装依赖、起服务：
+1. 装依赖、起服务：
 
    ```bash
    npm install
    npm run dev
    ```
 
-3. 打开 http://localhost:3000 。没配密钥时，界面和接口会给出明确的「未配置」提示，不会崩。
+2. 打开 http://localhost:3000 ，点右上角「API 密钥」，填入你自己的 `sk-` 密钥并保存。
+   密钥存在你浏览器本地，之后生成/编辑都用它。没填就点生成，会提示并自动弹出设置。
 
 校验：
 
@@ -40,6 +33,23 @@ SenseNova 图像模型非官方网页客户端，填提示词出图、传图改�
 npm run build   # 生产构建 + 类型检查
 npm run test    # 三个请求体的契约断言
 ```
+
+## 部署（自托管给别人用）
+
+生产构建后用 Next 自带服务：
+
+```bash
+npm run build
+npm run start        # 默认 3000，可用 PORT=xxxx 改
+```
+
+要点：
+
+- **必须上 HTTPS**（用 Nginx/Caddy 等反代终结 TLS）。BYOK 下密钥会随请求发到本站，明文 HTTP 会被窃听。
+- **BYOK 模型**：密钥存在用户浏览器，请求经本站代理转发到 SenseNova。代理只加 `Authorization` 头透传，不落盘、不记日志、不缓存密钥。
+- 每个用户用自己的密钥和额度，本站不替你付钱、也不存任何人的密钥。
+- 不信任本站的人，可以 clone 仓库自己本地部署，密钥只进自己机器。
+- 可选：想省掉「每人各填一次」，在服务器配 `.env.local` 的 `SENSENOVA_API_KEY` 作为单用户回退（见 `.env.example`）。但那样所有访客共用你这一个 key，只适合自己或内网小圈子。
 
 ![图片编辑](docs/screenshots/03-edit-tab.png)
 
@@ -54,8 +64,8 @@ npm run test    # 三个请求体的契约断言
 **历史记录存在哪里？**
 浏览器 IndexedDB（不是 localStorage，容量放得下原图）。每条存原图和一张 256px 缩略图，列表只读缩略图，点开才载原图。换浏览器或清站点数据会没。
 
-**密钥会不会进浏览器？**
-不会。请求由本地 Next 服务转发到 `token.sensenova.cn`，密钥待在服务端。开发期用 `.env.local`；也可以在右上角「API 密钥」里临时存到服务端内存（重启失效，只适合本机）。
+**密钥会不会被本站存起来？**
+不会。BYOK：密钥存在你自己的浏览器 localStorage，请求时以 `x-sensenova-key` 头发给本站代理，代理只把它加到 `Authorization` 转发给 SenseNova，服务端不落盘、不记日志。不放心就本地自托管。（服务器端也可配 `SENSENOVA_API_KEY` 作为单用户回退，见 `.env.example`。）
 
 ![设置 · API 密钥](docs/screenshots/04-settings-modal.png)
 

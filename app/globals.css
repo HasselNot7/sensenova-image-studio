@@ -264,13 +264,3 @@ html.dark .theme-icon--sun {
     background-color: #dc2626;
   }
 }
-
-/* Electron 自定义标题栏：app-region 非标准属性，手写类确保不被 purge。
-   仅在桌面端 titleBarStyle:hidden 下生效，网页环境无副作用。 */
-.app-drag {
-  -webkit-app-region: drag;
-}
-
-.app-no-drag {
-  -webkit-app-region: no-drag;
-}

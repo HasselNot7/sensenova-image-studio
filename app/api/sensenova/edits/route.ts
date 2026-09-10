@@ -1,4 +1,4 @@
-import { errorBody, forwardToSensenova } from "@/lib/sensenova-server";
+import { configMissingResponse, errorBody, forwardToSensenova, resolveApiKey } from "@/lib/sensenova-server";
 import { validateEditPayload } from "@/lib/request-builder";
 
 export async function POST(request: Request): Promise<Response> {
@@ -23,5 +23,10 @@ export async function POST(request: Request): Promise<Response> {
     return errorBody(issue);
   }
 
-  return forwardToSensenova("images/edits", body);
+  const apiKey = resolveApiKey(request);
+  if (!apiKey) {
+    return configMissingResponse();
+  }
+
+  return forwardToSensenova("images/edits", body, apiKey);
 }

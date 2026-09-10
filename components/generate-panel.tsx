@@ -23,6 +23,7 @@ import { Magnet } from "@/components/reactbits/Magnet";
 import { ShinyText } from "@/components/reactbits/ShinyText";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ResultView } from "@/components/result-view";
+import { useOpenSettings } from "@/components/settings-context";
 import { requestSensenovaImage } from "@/lib/api-client";
 import {
   PROMPT_MAX_CHARS_U1_FAST,
@@ -74,6 +75,7 @@ export function GeneratePanel({ onHistoryAdd }: GeneratePanelProps) {
   const [lastRequest, setLastRequest] = useState<GenerationRequest | null>(null);
 
   const isFast = model === U1_FAST;
+  const openSettings = useOpenSettings();
   const promptTooLong = isFast && prompt.length > PROMPT_MAX_CHARS_U1_FAST;
   const finalSize = !isFast && size === "__custom__" ? customSize.trim() : size;
 
@@ -115,10 +117,24 @@ export function GeneratePanel({ onHistoryAdd }: GeneratePanelProps) {
       } else {
         setImageResult(null);
         setFailure(response.failure);
-        toast.danger(response.failure.hint, { description: response.failure.message });
+        const isConfigError =
+          response.failure.type === "config_error" || response.failure.type === "server_config_error";
+        toast.danger(response.failure.hint, {
+          description: response.failure.message,
+          ...(isConfigError
+            ? {
+                timeout: 0,
+                actionProps: {
+                  children: "打开设置",
+                  onPress: () => openSettings(),
+                  variant: "tertiary" as const,
+                },
+              }
+            : {}),
+        });
       }
     },
-    [onHistoryAdd],
+    [onHistoryAdd, openSettings],
   );
 
   const handleSubmit = () => {

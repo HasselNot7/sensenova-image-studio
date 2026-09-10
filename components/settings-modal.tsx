@@ -7,92 +7,136 @@ import {
   Input,
   Label,
   Modal,
-  Spinner,
   TextField,
   toast,
 } from "@heroui/react";
 import { CircleInfo } from "@gravity-ui/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { sensenovaFetch } from "@/lib/api-client";
+import {
+  clearStoredApiKey,
+  getStoredApiKey,
+  isValidApiKey,
+  maskApiKey,
+  setStoredApiKey,
+} from "@/lib/api-key";
 import { parseUpstreamError } from "@/lib/errors";
 
 interface SettingsModalProps {
-  configured: boolean | null;
-  source: "session" | "env" | null;
-  onRecheck: () => void;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function SettingsModal({ configured, onRecheck, source }: SettingsModalProps) {
+/**
+ * 设置 · API 密钥（BYOK）。
+ * 密钥存浏览器 localStorage，请求经本站代理以 x-sensenova-key 头透传给 SenseNova，服务端不落盘/不记日志。
+ */
+export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
+  const [localKey, setLocalKey] = useState("");
   const [keyInput, setKeyInput] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [reveal, setReveal] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [serverConfigured, setServerConfigured] = useState(false);
 
-  const submitKey = async () => {
-    const trimmed = keyInput.trim();
-    if (!trimmed.startsWith("sk-")) {
-      toast.danger("密钥格式不正确", { description: "SenseNova 密钥应以 sk- 开头" });
+  useEffect(() => {
+    if (!isOpen) {
       return;
     }
-    setSaving(true);
+    let cancelled = false;
+    // 延后到微任务，避免 effect 体内同步 setState
+    Promise.resolve().then(() => {
+      if (!cancelled) {
+        setLocalKey(getStoredApiKey());
+      }
+    });
+    // 自托管单用户：服务器已配 SENSENOVA_API_KEY 时可免填（环境变量回退）。
+    fetch("/api/sensenova/status")
+      .then((res) => res.json())
+      .then((data: { configured?: boolean }) => {
+        if (!cancelled) {
+          setServerConfigured(Boolean(data?.configured));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
+  const configured = localKey.length > 0 || serverConfigured;
+
+  const saveKey = () => {
+    const trimmed = keyInput.trim();
+    if (!isValidApiKey(trimmed)) {
+      toast.danger("密钥格式不正确", { description: "应为 sk- 开头、非空，且不少于 9 个字符" });
+      return;
+    }
+    setStoredApiKey(trimmed);
+    setLocalKey(trimmed);
+    setKeyInput("");
+    setReveal(false);
+    toast.success("密钥已保存到本浏览器", { description: "仅存于 localStorage，不上传到本站服务器" });
+  };
+
+  const clearKey = () => {
+    clearStoredApiKey();
+    setLocalKey("");
+    setKeyInput("");
+    toast.info("已清除浏览器中的密钥");
+  };
+
+  const testConnectivity = async () => {
+    const key = (keyInput.trim() || localKey).trim();
+    if (key.length === 0) {
+      toast.warning("请先输入或保存密钥", { description: "测试用当前输入框的 Key（未填则用已保存的）" });
+      return;
+    }
+    setTesting(true);
     try {
-      const res = await fetch("/api/sensenova/key", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: trimmed }),
-      });
-      const data = await res.json().catch(() => null);
-      if (res.ok) {
-        setKeyInput("");
-        toast.success("会话密钥已保存到服务端内存", {
-          description: "重启服务后失效；环境变量密钥始终优先展示",
-        });
-        onRecheck();
+      const { status, ok, payload } = await sensenovaFetch("/api/sensenova/models", { keyOverride: key });
+      if (ok) {
+        const data = (payload as { data?: unknown }) ?? {};
+        const count = Array.isArray(data.data) ? data.data.length : 0;
+        toast.success("连通成功", { description: `该密钥可用模型 ${count} 个` });
       } else {
-        const failure = parseUpstreamError(data, res.status);
+        const failure = parseUpstreamError(payload, status);
         toast.danger(failure.hint, { description: failure.message });
       }
     } catch (error) {
-      toast.danger("保存失败", { description: error instanceof Error ? error.message : "网络异常" });
+      toast.danger("测试失败", { description: error instanceof Error ? error.message : "网络异常" });
     } finally {
-      setSaving(false);
-    }
-  };
-
-  const clearSessionKey = async () => {
-    setSaving(true);
-    try {
-      await fetch("/api/sensenova/key", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clear: true }),
-      });
-      toast.info("已清除会话密钥");
-      onRecheck();
-    } finally {
-      setSaving(false);
+      setTesting(false);
     }
   };
 
   const statusText =
-    source === "env"
-      ? "环境变量已配置（推荐，服务端 .env.local）"
-      : source === "session"
-        ? "会话密钥已配置（仅存服务端内存，重启服务后需重新输入）"
-        : "未检测到任何密钥";
+    localKey.length > 0
+      ? `已保存到你的浏览器（${maskApiKey(localKey)}）`
+      : serverConfigured
+        ? "检测到服务器已配置 SENSENOVA_API_KEY（自托管回退），可直接使用"
+        : "未配置：填入你自己的 sk- 密钥，仅保存在本机浏览器";
+
+  const chipLabel =
+    localKey.length > 0
+      ? `API 密钥：已配置 ${maskApiKey(localKey)}`
+      : serverConfigured
+        ? "API 密钥：已配置（服务器）"
+        : "API 密钥：未配置";
 
   return (
-    <Modal>
-      <Modal.Trigger aria-label="打开设置" className="rounded-xl">
-        <Chip color={configured ? "success" : configured === false ? "warning" : "default"} variant="soft">
-          {configured === null ? (
-            <Spinner size="sm" />
-          ) : configured ? (
-            source === "session" ? "API 密钥：会话已配置" : "API 密钥：已配置"
-          ) : (
-            "API 密钥：未配置"
-          )}
+    <>
+      <button
+        type="button"
+        aria-label="打开设置"
+        className="cursor-pointer rounded-xl"
+        onClick={() => onOpenChange(true)}
+      >
+        <Chip color={configured ? "success" : "warning"} variant="soft">
+          {chipLabel}
         </Chip>
-      </Modal.Trigger>
-      <Modal.Backdrop>
+      </button>
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container>
           <Modal.Dialog className="rounded-card sm:max-w-md">
             <Modal.CloseTrigger />
@@ -111,54 +155,46 @@ export function SettingsModal({ configured, onRecheck, source }: SettingsModalPr
                 </Alert.Content>
               </Alert>
 
-              <TextField
-                isDisabled={saving}
-                value={keyInput}
-                onChange={setKeyInput}
-              >
-                <Label>输入会话密钥（可选，快速测试用）</Label>
+              <TextField value={keyInput} onChange={setKeyInput}>
+                <Label>SenseNova API 密钥</Label>
                 <Input
                   placeholder="sk-……（platform.sensenova.cn 控制台创建）"
-                  type="password"
+                  type={reveal ? "text" : "password"}
                 />
               </TextField>
-              <div className="flex flex-wrap justify-end gap-2">
-                {source === "session" ? (
-                  <Button isDisabled={saving} variant="danger-soft" onPress={() => void clearSessionKey()}>
-                    清除会话密钥
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  isDisabled={keyInput.length === 0}
+                  size="sm"
+                  variant="tertiary"
+                  onPress={() => setReveal((v) => !v)}
+                >
+                  {reveal ? "隐藏" : "显示"}
+                </Button>
+                <Button isDisabled={keyInput.trim().length === 0} variant="primary" onPress={saveKey}>
+                  保存到浏览器
+                </Button>
+                <Button isPending={testing} variant="secondary" onPress={() => void testConnectivity()}>
+                  测试连通
+                </Button>
+                {localKey.length > 0 ? (
+                  <Button variant="danger-soft" onPress={clearKey}>
+                    清除
                   </Button>
                 ) : null}
-                <Button
-                  isDisabled={keyInput.trim().length === 0}
-                  isPending={saving}
-                  variant="primary"
-                  onPress={() => void submitKey()}
-                >
-                  保存到服务端
-                </Button>
               </div>
 
-              <div className="flex flex-col gap-2 text-sm">
-                <p className="text-muted">生产推荐（密钥完全不经过浏览器）：</p>
-                <ol className="list-inside list-decimal space-y-1 text-muted">
-                  <li>
-                    复制 <code className="rounded bg-default px-1">.env.example</code> 为{" "}
-                    <code className="rounded bg-default px-1">.env.local</code>，填入{" "}
-                    <code className="rounded bg-default px-1">SENSENOVA_API_KEY=sk-xxx</code>
-                  </li>
-                  <li>重启开发/生产服务</li>
-                </ol>
-              </div>
+              <p className="text-xs leading-relaxed text-muted">
+                密钥仅保存在你的浏览器中，请求经本站服务器透传给 SenseNova，不落盘、不记日志；不信任本站者可自行本地部署。
+              </p>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onPress={onRecheck}>
-                重新检查
-              </Button>
               <Button slot="close">完成</Button>
             </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>
-    </Modal>
+    </>
   );
 }

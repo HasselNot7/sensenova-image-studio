@@ -48,9 +48,6 @@ next-env.d.ts
 /src-tauri/target/
 /src-tauri/gen/
 
-# electron
-/release/
-
 # local docs & agent configs (not published)
 /.agents/
 skills-lock.json

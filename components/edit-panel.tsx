@@ -23,6 +23,7 @@ import { Magnet } from "@/components/reactbits/Magnet";
 import { ShinyText } from "@/components/reactbits/ShinyText";
 import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
 import { ResultView } from "@/components/result-view";
+import { useOpenSettings } from "@/components/settings-context";
 import { requestSensenovaImage } from "@/lib/api-client";
 import { createHistoryItem, type HistoryInput } from "@/lib/history";
 import {
@@ -84,6 +85,7 @@ export function EditPanel({ onHistoryAdd }: EditPanelProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const compressToken = useRef(0);
+  const openSettings = useOpenSettings();
 
   const runCompression = useCallback((sourceImage: SourceImage, target: number) => {
     const token = compressToken.current + 1;
@@ -226,10 +228,24 @@ export function EditPanel({ onHistoryAdd }: EditPanelProps) {
       } else {
         setImageResult(null);
         setFailure(response.failure);
-        toast.danger(response.failure.hint, { description: response.failure.message });
+        const isConfigError =
+          response.failure.type === "config_error" || response.failure.type === "server_config_error";
+        toast.danger(response.failure.hint, {
+          description: response.failure.message,
+          ...(isConfigError
+            ? {
+                timeout: 0,
+                actionProps: {
+                  children: "打开设置",
+                  onPress: () => openSettings(),
+                  variant: "tertiary" as const,
+                },
+              }
+            : {}),
+        });
       }
     },
-    [fileName, onHistoryAdd, source],
+    [fileName, onHistoryAdd, openSettings, source],
   );
 
   const handleSubmit = () => {
