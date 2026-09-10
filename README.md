@@ -75,7 +75,7 @@ npm run test    # 三个请求体的契约断言
 
 ## License
 
-GPL-3.0，全文见 [LICENSE](LICENSE)。
+AGPL-3.0，全文见 [LICENSE](LICENSE)。
 
 Copyright (c) 2026 HasselNot7
 
