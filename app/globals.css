@@ -179,6 +179,41 @@ body {
   mix-blend-mode: normal;
 }
 
+/* 主题切换全局颜色过渡：仅切换瞬间挂载 .theme-transitioning（250ms 后移除），
+   避免常驻 transition 干扰 hover 等其它动效时序。 */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    fill 220ms ease;
+}
+
+/* 太阳/月亮图标交叉切换：非激活态 scale .8 + rotate -30° 淡出；
+   过渡仅在 .theme-transitioning 下启用 → 首屏/刷新（无该类）不触发任何动画。 */
+.theme-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  transform: scale(0.8) rotate(-30deg);
+}
+
+html:not(.dark) .theme-icon--moon,
+html.dark .theme-icon--sun {
+  opacity: 1;
+  transform: none;
+}
+
+.theme-transitioning .theme-icon {
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
 /* ============================================================
    少量定向组件微调（优先变量方案覆盖不到的细节）
    ============================================================ */
@@ -228,4 +263,14 @@ body {
   .toast--danger::before {
     background-color: #dc2626;
   }
+}
+
+/* Electron 自定义标题栏：app-region 非标准属性，手写类确保不被 purge。
+   仅在桌面端 titleBarStyle:hidden 下生效，网页环境无副作用。 */
+.app-drag {
+  -webkit-app-region: drag;
+}
+
+.app-no-drag {
+  -webkit-app-region: no-drag;
 }
