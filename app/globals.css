@@ -263,4 +263,52 @@ html.dark .theme-icon--sun {
   .toast--danger::before {
     background-color: #dc2626;
   }
+
+  /* Toast 关闭按钮：无边框 ghost 图标按钮，常驻显示，收进圆角安全区内。
+     观感：无 border/背景，14px 图标 + --text-muted；hover 底色（暗色 8% 白 / 浅色 --bg-inset）+ 图标变 --text-primary；200ms 过渡。
+     focus ring 仅绑定 :focus-visible；HeroUI/react-aria 实测 toast 弹出不会程序化聚焦按钮，无需额外禁焦。 */
+  .toast .toast__close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    opacity: 1;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--text-muted);
+    pointer-events: auto;
+    inset-inline-end: 8px;
+    inset-block-start: 8px;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      opacity 200ms ease;
+  }
+
+  .toast .toast__close-button [data-slot="close-button-icon"] {
+    width: 14px;
+    height: 14px;
+  }
+
+  .toast .toast__close-button:hover {
+    background-color: var(--bg-inset);
+    color: var(--text-primary);
+  }
+
+  .dark .toast .toast__close-button:hover {
+    background-color: rgb(255 255 255 / 0.08);
+    color: var(--text-primary);
+  }
+
+  .toast .toast__close-button:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .toast .toast__close-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
 }
