@@ -51,7 +51,7 @@ npm run start        # 默认 3000，可用 PORT=xxxx 改
 应用不靠那条临时链接。代理在服务端把图下载下来转成 Data-URL 再返回，历史里存的就是 Data-URL，24 小时后照样能看。
 
 **水印和 prompt_extend 是干什么的？**
-`watermark` 是官方 Logo 水印，默认开，关掉在公测期免费。`prompt_extend` 让模型先把你的提示词扩写润色再生图，关掉就完全按你写的来。`sensenova-u1-fast` 没有 `output_format` / `response_format` / `prompt_extend` 这几个参数，只有 `watermark` 是两边都显式发的。
+`watermark` 是官方 Logo 水印，默认关（公测期关闭免费）。`prompt_extend` 让模型先把你的提示词扩写润色再生图，关掉就完全按你写的来。`sensenova-u1-fast` 没有 `output_format` / `response_format` / `prompt_extend` 这几个参数，只有 `watermark` 是两边都显式发的。
 
 **历史记录存在哪里？**
 浏览器 IndexedDB（不是 localStorage，容量放得下原图）。每条存原图和一张 256px 缩略图，列表只读缩略图，点开才载原图。换浏览器或清站点数据会没。

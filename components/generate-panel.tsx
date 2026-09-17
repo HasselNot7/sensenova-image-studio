@@ -62,7 +62,7 @@ export function GeneratePanel({ onHistoryAdd }: GeneratePanelProps) {
   const [prompt, setPrompt] = useState("");
   const [size, setSize] = useState<string>(U1_LITE_DEFAULT_SIZE);
   const [customSize, setCustomSize] = useState("");
-  const [watermark, setWatermark] = useState(true);
+  const [watermark, setWatermark] = useState(false);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("png");
   const [responseFormat, setResponseFormat] = useState<ResponseFormat>("b64_json");
   const [promptExtend, setPromptExtend] = useState(true);
