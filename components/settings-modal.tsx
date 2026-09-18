@@ -11,15 +11,17 @@ import {
   toast,
 } from "@heroui/react";
 import { CircleInfo } from "@gravity-ui/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { sensenovaFetch } from "@/lib/api-client";
 import {
   clearStoredApiKey,
   getStoredApiKey,
+  getStoredApiKeyServerSnapshot,
   isValidApiKey,
   maskApiKey,
   setStoredApiKey,
+  subscribeStoredApiKey,
 } from "@/lib/api-key";
 import { parseUpstreamError } from "@/lib/errors";
 
@@ -33,23 +35,20 @@ interface SettingsModalProps {
  * 密钥存浏览器 localStorage，请求经本站代理以 x-sensenova-key 头透传给 SenseNova，服务端不落盘/不记日志。
  */
 export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
-  const [localKey, setLocalKey] = useState("");
+  // 顶栏徽标常驻，故密钥须在挂载时就从 localStorage 读出（订阅式读取，避免水合后仍显示「未配置」）。
+  const localKey = useSyncExternalStore(
+    subscribeStoredApiKey,
+    getStoredApiKey,
+    getStoredApiKeyServerSnapshot,
+  );
   const [keyInput, setKeyInput] = useState("");
   const [reveal, setReveal] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [serverConfigured, setServerConfigured] = useState(false);
+  // null = 尚未问到服务器，此时不能断言「未配置」。
+  const [serverConfigured, setServerConfigured] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
     let cancelled = false;
-    // 延后到微任务，避免 effect 体内同步 setState
-    Promise.resolve().then(() => {
-      if (!cancelled) {
-        setLocalKey(getStoredApiKey());
-      }
-    });
     // 自托管单用户：服务器已配 SENSENOVA_API_KEY 时可免填（环境变量回退）。
     fetch("/api/sensenova/status")
       .then((res) => res.json())
@@ -58,13 +57,17 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
           setServerConfigured(Boolean(data?.configured));
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) {
+          setServerConfigured(false);
+        }
+      });
     return () => {
       cancelled = true;
     };
   }, [isOpen]);
 
-  const configured = localKey.length > 0 || serverConfigured;
+  const configured = localKey.length > 0 || serverConfigured === true;
 
   const saveKey = () => {
     const trimmed = keyInput.trim();
@@ -73,7 +76,6 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
       return;
     }
     setStoredApiKey(trimmed);
-    setLocalKey(trimmed);
     setKeyInput("");
     setReveal(false);
     toast.success("密钥已保存到本浏览器", { description: "仅存于 localStorage，不上传到本站服务器" });
@@ -81,7 +83,6 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
 
   const clearKey = () => {
     clearStoredApiKey();
-    setLocalKey("");
     setKeyInput("");
     toast.info("已清除浏览器中的密钥");
   };
@@ -113,16 +114,20 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
   const statusText =
     localKey.length > 0
       ? `已保存到你的浏览器（${maskApiKey(localKey)}）`
-      : serverConfigured
+      : serverConfigured === true
         ? "检测到服务器已配置 SENSENOVA_API_KEY（自托管回退），可直接使用"
         : "未配置：填入你自己的 sk- 密钥，仅保存在本机浏览器";
 
   const chipLabel =
     localKey.length > 0
       ? `API 密钥：已配置 ${maskApiKey(localKey)}`
-      : serverConfigured
+      : serverConfigured === true
         ? "API 密钥：已配置（服务器）"
-        : "API 密钥：未配置";
+        : serverConfigured === null
+          ? "API 密钥：检测中…"
+          : "API 密钥：未配置";
+
+  const chipColor = configured ? "success" : serverConfigured === null ? "default" : "warning";
 
   return (
     <>
@@ -132,7 +137,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
         className="cursor-pointer rounded-xl"
         onClick={() => onOpenChange(true)}
       >
-        <Chip color={configured ? "success" : "warning"} variant="soft">
+        <Chip color={chipColor} variant="soft">
           {chipLabel}
         </Chip>
       </button>

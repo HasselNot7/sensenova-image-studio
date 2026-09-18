@@ -14,12 +14,35 @@ export function getStoredApiKey(): string {
   }
 }
 
+type Listener = () => void;
+
+const listeners = new Set<Listener>();
+
+/**
+ * 供 useSyncExternalStore 订阅密钥变化。
+ * 同页写入不会触发原生 storage 事件，所以再叠一层模块级监听器；跨标签页靠原生事件兜住。
+ */
+export function subscribeStoredApiKey(listener: Listener): () => void {
+  listeners.add(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
+}
+
+/** 服务端渲染时读不到 localStorage，水合首帧统一按「未配置」处理，随后由订阅纠正。 */
+export function getStoredApiKeyServerSnapshot(): string {
+  return "";
+}
+
 export function setStoredApiKey(key: string): void {
   try {
     window.localStorage.setItem(API_KEY_STORAGE, key);
   } catch {
     // 隐私模式等写入失败时忽略
   }
+  notifyStoredApiKeyChange();
 }
 
 export function clearStoredApiKey(): void {
@@ -27,6 +50,13 @@ export function clearStoredApiKey(): void {
     window.localStorage.removeItem(API_KEY_STORAGE);
   } catch {
     // ignore
+  }
+  notifyStoredApiKeyChange();
+}
+
+function notifyStoredApiKeyChange(): void {
+  for (const listener of [...listeners]) {
+    listener();
   }
 }
 
