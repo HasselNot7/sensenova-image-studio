@@ -1,0 +1,31 @@
+{
+  "id": "gc-minimal-zine-poster",
+  "order": 7,
+  "name": "极简纸感 Zine 海报",
+  "nameEn": "Minimal Zine Poster v0.3.1",
+  "shortDescription": "把照片或主题变成诗性纸感留白微编辑海报：大面积负空间 + 一个小型视觉事件 + 一点高饱和色，实验排版，日系独立 zine 气质",
+  "author": "LiamGvchi",
+  "source": "https://github.com/LiamGvchi/gc-minimal-zine-poster",
+  "license": "MIT License",
+  "licenseFile": "_licenses/gc-minimal-zine-poster.txt",
+  "mode": "i2i",
+  "inputImages": {
+    "min": 1,
+    "max": 1
+  },
+  "promptParts": [
+    "SKILL.md",
+    "references/style-system.md",
+    "references/prompt-compiler.md",
+    "references/variation-engine.md",
+    "references/quality-gate.md",
+    "references/reference-analysis.md"
+  ],
+  "userNotePlaceholder": "主题一句话或想保留的画面要素，例如「雨天的站台上等车的人，保留人物剪影」",
+  "tags": [
+    "极简",
+    "zine",
+    "拼贴",
+    "负空间"
+  ]
+}

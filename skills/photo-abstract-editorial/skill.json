@@ -1,0 +1,27 @@
+{
+  "id": "photo-abstract-editorial",
+  "order": 1,
+  "name": "抽象记忆双联",
+  "nameEn": "Photo Abstract Editorial",
+  "shortDescription": "保留原照片为主体，下方拼接一格由照片空间关系重构的极简抽象面板与英文标题",
+  "author": "ZzzLc0405",
+  "source": "https://github.com/ZzzLc0405/photo-abstract-editorial",
+  "license": "个人学习与非商业使用（商业使用需向作者取得授权）",
+  "licenseFile": "_licenses/photo-abstract-editorial.txt",
+  "mode": "i2i",
+  "inputImages": {
+    "min": 1,
+    "max": 1
+  },
+  "promptParts": [
+    "SKILL.md",
+    "references/photo-abstract-editorial-prompt.zh-CN.md"
+  ],
+  "userNotePlaceholder": "想让这幅双联作品更偏向什么？例如「保留更多人群节奏」「标题用 winter avenue」",
+  "tags": [
+    "编辑排版",
+    "极简",
+    "抽象构成",
+    "竖幅"
+  ]
+}

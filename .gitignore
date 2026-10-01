@@ -1,0 +1,62 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# vite
+/dist
+
+# tauri
+/src-tauri/target/
+/src-tauri/gen/
+
+# local docs & agent configs (not published)
+/.agents/
+skills-lock.json
+opencode.json
+AGENTS.md
+CLAUDE.md
+heroui-sensenova-prompt.md
+heroui-sensenova-ui-polish.md
+
+# 由 scripts/build-skills.ts 生成的产物（源文件在 skills/ 下入库）
+/lib/skills.generated.ts
+/public/skills/

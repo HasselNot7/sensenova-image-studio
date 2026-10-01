@@ -1,0 +1,26 @@
+{
+  "id": "scene-distillation-zine-v1-3",
+  "order": 2,
+  "name": "影像蒸馏 · 纸刊插画",
+  "nameEn": "Scene Distillation Zine v1.3",
+  "shortDescription": "把照片当作语义证据而非素材层，蒸馏成一件带作者性排版的高纯度纸刊插画作品",
+  "author": "Zeejay0",
+  "source": "https://github.com/Zeejay0/gathered-scenes-zine-skill",
+  "license": "Gathered Scenes Zine Personal Non-Commercial License v1.0",
+  "licenseFile": "_licenses/gathered-scenes-zine.txt",
+  "mode": "i2i",
+  "inputImages": {
+    "min": 1,
+    "max": 1
+  },
+  "promptParts": [
+    "SKILL.md"
+  ],
+  "userNotePlaceholder": "想强调的情绪或命题，例如「让空旷感压过细节」「单色块模式」",
+  "tags": [
+    "纸刊",
+    "插画",
+    "高饱和",
+    "排版自由"
+  ]
+}

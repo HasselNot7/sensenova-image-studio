@@ -1,0 +1,37 @@
+{
+  "name": "image-skill-studio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "npm run build:skills",
+    "dev": "next dev",
+    "prebuild": "npm run build:skills",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "build:skills": "tsx scripts/build-skills.ts",
+    "test": "node --import tsx --test lib/request-builder.test.ts lib/distill.test.ts lib/distill-cache.test.ts lib/gpt-image.test.ts lib/skills.test.ts"
+  },
+  "dependencies": {
+    "@gravity-ui/icons": "^2.22.0",
+    "@heroui/react": "^3.2.4",
+    "@heroui/styles": "^3.2.4",
+    "idb-keyval": "^6.3.0",
+    "motion": "^13.2.0",
+    "next": "16.3.4",
+    "next-themes": "^0.4.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.13",
+    "typescript": "^5"
+  }
+}

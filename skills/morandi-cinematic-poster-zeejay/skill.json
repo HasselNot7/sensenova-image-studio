@@ -1,0 +1,33 @@
+{
+  "id": "morandi-cinematic-poster-zeejay",
+  "order": 4,
+  "name": "莫兰迪电影海报",
+  "nameEn": "Morandi Cinematic Poster",
+  "shortDescription": "照片保持原样不动，只靠片名排版、层级、负空间与选择性遮挡做出电影海报气质",
+  "author": "Zeejay0",
+  "source": "https://github.com/Zeejay0/gathered-scenes-zine-skill",
+  "license": "Gathered Scenes Zine Personal Non-Commercial License v1.0",
+  "licenseFile": "_licenses/gathered-scenes-zine.txt",
+  "mode": "i2i",
+  "inputImages": {
+    "min": 1,
+    "max": 1
+  },
+  "promptParts": [
+    "SKILL.md"
+  ],
+  "bundledImages": [
+    {
+      "file": "assets/reference-typography-material-v1.png",
+      "label": "作者示例 · 不发送",
+      "note": "只给人看的成品示例；图像模型会把任何输入图当内容抄进结果，因此本站不发送它。"
+    }
+  ],
+  "userNotePlaceholder": "片名想用什么词、是否要一行诗意副标题或上映信息，例如「主标题 WINTER LIGHTS」",
+  "tags": [
+    "电影海报",
+    "排版",
+    "莫兰迪色",
+    "材质"
+  ]
+}

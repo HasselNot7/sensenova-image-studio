@@ -1,0 +1,315 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   设计令牌（精致浅色风）— 唯一色值来源，JSX 只引用 token
+   背景/表面/文本/描边一律走 HeroUI 语义变量（自动翻转深浅色），
+   此处只新增品牌色、圆角、阴影、动效等 HeroUI 没有的 token。
+   ============================================================ */
+@theme {
+  /* 品牌 */
+  --color-brand: #1177e4;
+  --color-brand-ring: rgba(47, 126, 247, 0.35);
+  --color-on-brand: #ffffff;
+  --color-glass: rgb(255 255 255 / 0.8);
+
+  /* 空态图标容器（纯色淡蓝） */
+  --color-tint: #eaf2ff;
+
+  /* 圆角 */
+  --radius-card: 16px;
+  --radius-control: 10px;
+  --radius-pill: 9999px;
+
+  /* 三层阴影（冷调，禁止纯黑） */
+  --shadow-1: 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-2: 0 1px 3px rgb(15 23 42 / 0.05), 0 8px 24px -8px rgb(15 23 42 / 0.1);
+  --shadow-3: 0 2px 4px rgb(15 23 42 / 0.04), 0 16px 40px -12px rgb(37 99 235 / 0.18);
+
+  /* 动效 */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-image-in: image-in 250ms var(--ease-out-soft) both;
+
+  @keyframes image-in {
+    from {
+      opacity: 0;
+      scale: 0.98;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+}
+
+/* 字体栈：Inter（拉丁 UI）+ 思源黑体（中文，本机分发名 Noto Sans SC）+ JetBrains Mono（技术值），next/font 自托管变量 */
+@theme inline {
+  --font-sans: var(--font-inter), "Source Han Sans SC", "Noto Sans SC", "思源黑体",
+    "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", Consolas,
+    "Source Han Sans SC", "Noto Sans SC", "思源黑体", "PingFang SC", "Microsoft YaHei", monospace;
+}
+
+/* ============================================================
+   HeroUI v3 官方主题变量对齐（无 !important，纯变量覆盖）
+   浅色 = 验收基准；深色保证可读即可。
+   ============================================================ */
+:root {
+  /* 页面冷灰底 / 纯白卡面 / 次级面 / 输入轨道（浅色字面值） */
+  --bg-page: #f5f7fb;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f8fafc;
+  --bg-inset: #eef2f7;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-default: #e5eaf2;
+  --border-strong: #d7dee9;
+
+  --radius: 0.625rem;
+  --field-radius: 10px;
+
+  --background: var(--bg-page);
+  --foreground: var(--text-primary);
+  --surface: var(--bg-surface);
+  --surface-secondary: var(--bg-subtle);
+  --surface-tertiary: var(--bg-inset);
+  --overlay: var(--bg-surface);
+
+  --muted: var(--text-muted);
+  --border: var(--border-default);
+  --separator: var(--border-default);
+
+  --default: var(--bg-inset);
+  --default-foreground: var(--text-primary);
+
+  --accent: var(--color-brand);
+  --accent-foreground: var(--color-on-brand);
+
+  --segment: var(--bg-surface);
+  --segment-foreground: var(--text-primary);
+
+  --field-background: var(--bg-surface);
+  --field-foreground: var(--text-primary);
+  --field-placeholder: var(--text-muted);
+  --field-border: var(--border-strong);
+
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning-soft: #fef3c7;
+  --warning-soft-foreground: #b45309;
+
+  --focus: var(--color-brand);
+
+  --surface-shadow: var(--shadow-2);
+  --overlay-shadow: var(--shadow-3);
+  --field-shadow: var(--shadow-1);
+
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-track: transparent;
+
+  --skeleton-animation: shimmer;
+}
+
+.dark,
+[data-theme="dark"] {
+  --bg-page: #0b1220;
+  --bg-surface: #121a2b;
+  --bg-subtle: #182236;
+  --bg-inset: #1e2a42;
+  --text-primary: #e6ebf4;
+  --text-secondary: #a7b3c8;
+  --text-muted: #8b98af;
+  --border-default: #23304b;
+  --border-strong: #2a3a58;
+
+  --background: var(--bg-page);
+  --foreground: var(--text-primary);
+  --surface: var(--bg-surface);
+  --surface-secondary: var(--bg-subtle);
+  --surface-tertiary: var(--bg-inset);
+  --overlay: #141d31;
+
+  --muted: var(--text-muted);
+  --border: var(--border-default);
+  --separator: var(--border-default);
+
+  --default: var(--bg-inset);
+  --default-foreground: var(--text-primary);
+
+  --accent: #4d97ef;
+  --accent-foreground: #0b1220;
+
+  --segment: #24334f;
+  --segment-foreground: #f1f5fb;
+
+  --field-background: #0f1728;
+  --field-foreground: var(--text-primary);
+  --field-placeholder: #64748b;
+  --field-border: var(--border-strong);
+
+  --focus: #4d97ef;
+
+  --surface-shadow: 0 1px 3px rgb(0 0 0 / 0.4), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+  --overlay-shadow: 0 2px 4px rgb(0 0 0 / 0.4), 0 16px 40px -12px rgb(0 0 0 / 0.6);
+  --field-shadow: none;
+
+  --scrollbar-thumb: var(--border-strong);
+
+  /* 品牌与装饰 token 的深色对应值 */
+  --color-brand: #6db3f5;
+  --color-glass: rgb(11 18 32 / 0.8);
+  --color-tint: #14233d;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 1px 3px rgb(0 0 0 / 0.4), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+  --shadow-3: 0 2px 4px rgb(0 0 0 / 0.4), 0 16px 40px -12px rgb(0 0 0 / 0.6);
+}
+
+body {
+  font-family: var(--font-sans);
+  /* cv11/ss01：Inter 均衡数字与替代字形；tnum：时间/计数等宽数字 */
+  font-feature-settings: "cv11", "ss01", "tnum";
+}
+
+/* 主题切换：禁用默认交叉淡入，仅保留从按钮位置扩散的 clip-path 揭示动画 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* 主题切换全局颜色过渡：仅切换瞬间挂载 .theme-transitioning（250ms 后移除），
+   避免常驻 transition 干扰 hover 等其它动效时序。 */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    fill 220ms ease;
+}
+
+/* 太阳/月亮图标交叉切换：非激活态 scale .8 + rotate -30° 淡出；
+   过渡仅在 .theme-transitioning 下启用 → 首屏/刷新（无该类）不触发任何动画。 */
+.theme-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  transform: scale(0.8) rotate(-30deg);
+}
+
+html:not(.dark) .theme-icon--moon,
+html.dark .theme-icon--sun {
+  opacity: 1;
+  transform: none;
+}
+
+.theme-transitioning .theme-icon {
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+/* ============================================================
+   少量定向组件微调（优先变量方案覆盖不到的细节）
+   ============================================================ */
+@layer components {
+  /* API 技术值（模型 ID、参数枚举、尺寸）：mono + 次级色，与中文注形成混排 */
+  .tech {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+
+  /* segmented Tabs：选中块用一层浅阴影，图标随选中变品牌色 */
+  .tabs__indicator {
+    box-shadow: var(--shadow-1);
+  }
+
+  .tabs__tab[data-selected="true"] svg {
+    color: var(--color-brand);
+  }
+
+  /* Toast：12px 圆角 + 左侧 3px 语义色条 */
+  .toast {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .toast::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    content: "";
+    background-color: var(--text-muted);
+  }
+
+  .toast--accent::before {
+    background-color: var(--color-brand);
+  }
+
+  .toast--success::before {
+    background-color: #16a34a;
+  }
+
+  .toast--warning::before {
+    background-color: #b45309;
+  }
+
+  .toast--danger::before {
+    background-color: #dc2626;
+  }
+
+  /* Toast 关闭按钮：无边框 ghost 图标按钮，常驻显示，收进圆角安全区内。
+     观感：无 border/背景，14px 图标 + --text-muted；hover 底色（暗色 8% 白 / 浅色 --bg-inset）+ 图标变 --text-primary；200ms 过渡。
+     focus ring 仅绑定 :focus-visible；HeroUI/react-aria 实测 toast 弹出不会程序化聚焦按钮，无需额外禁焦。 */
+  .toast .toast__close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    opacity: 1;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--text-muted);
+    pointer-events: auto;
+    inset-inline-end: 8px;
+    inset-block-start: 8px;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      opacity 200ms ease;
+  }
+
+  .toast .toast__close-button [data-slot="close-button-icon"] {
+    width: 14px;
+    height: 14px;
+  }
+
+  .toast .toast__close-button:hover {
+    background-color: var(--bg-inset);
+    color: var(--text-primary);
+  }
+
+  .dark .toast .toast__close-button:hover {
+    background-color: rgb(255 255 255 / 0.08);
+    color: var(--text-primary);
+  }
+
+  .toast .toast__close-button:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .toast .toast__close-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+}

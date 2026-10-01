@@ -1,0 +1,21 @@
+Source-faithful cinematic photography poster: photograph, title and small type as one composition. Built entirely through typography, hierarchy, negative space, alignment and selective depth — theatrical key art mood, never a real film. No named-film imitation, protected title lettering, decorative symbols or collage motifs; derive an original typographic identity from the scene.
+
+Plate: portrait input → exact vertical 3:4 unless asked, smallest safe crop taken from low-information sky, road, wall or periphery; faces, landmark identity, gestures, perspective, axes and negative space stay unobscured; never stretch. After cropping the photo is a LOCKED SOURCE PLATE — outside glyph masks nothing changes: framing, geometry, people, vehicles, signage, clouds, buildings, color, exposure, contrast, sharpness, noise and texture stay as shot. No regenerating, repainting, relighting, retouching, grading, blurring, sharpening, denoising, aging or global paper effect.
+
+Infer one short movie premise for mood and wording only; never invent visual events or characters. Small text sits only on quiet, calm fields; no letter or microtype across an eye or mouth.
+
+Archetype — pick one: bottom-anchor; top-proclamation (title in open sky or wall above the subject); central-emblem (title and hero fuse at center); integrated-axis (title follows or counters a horizon, road, facade or beam); edge-scale (title bleeds off-canvas, core stays readable). Never distribute text evenly around four edges. One dominant cluster, one supporting, one quiet zone.
+
+Copy deck — 3–5 roles, title required: Title original and scene-derived, 1–4 words. Byline: alias, invented name or non-personal phrase. Tagline 3–10 words, ≤2 lines. Metadata: place, weather, time, coordinates, chapter or archive code. Microcopy: compact billing-block-like footer with scene nouns and invented names. Action marker: a date, chapter code or edition number. Invented names welcome; never real people, studios, festivals, logos, awards, ratings, trademarks or fake laurels.
+
+Title is a designed mark, not typed text: one genre voice (classical serif/Didone for memory and romance; grotesk/slab for urban and action; tracked geometric sans for science and distance; humanist serif or soft sans for intimacy and travel; hybrid for surreal). Max two type families, monospaced only in microcopy. Customize 1–3 letter details from visible structure — roofline, window rhythm, road, shadow — while keeping instant readability; never distort every letter. No metallic, neon, bevel, glow, grunge, outlines or franchise styling. Readable in 3 seconds at thumbnail; two-line break semantic or rhythmic with no weak orphan; title width aligns to a meaningful boundary.
+
+Hierarchy (title = 100): byline/marker 20–32; tagline 12–20; metadata 8–12; microcopy 5–9. Adjacent levels visibly different; one L1; ≤1 L2 cluster.
+
+Type–image: connect type to the hero by alignment, proximity or directional opposition, not by centering in empty space; support text aligns to real horizons, facades, window rhythm and perspective axes. Title strokes stay mostly in one depth plane with max 1–3 occlusions where identity requires; small type always fully readable. Title color sampled from the photo or a muted complement — reduce chroma before darkness; legibility by value and placement, never shadows or boxes. Palette 2–3 low-saturation colors plus ≤1 accent on the action marker; title survives grayscale and thumbnail.
+
+Material: byline uppercase or small caps with generous tracking, lighter than the title; tagline quiet, 1–2 short lines, no effects; microcopy ultra-condensed, tight leading, compact gray texture, clean edges, aligned to the title or a lower boundary, away from busy detail. Paper fibers and letterpress irregularity live only inside large title glyphs; small type stays clean ink; never global texture.
+
+Bans: no boxes, panels, frames, circles, stickers, tape, laurels, awards, symbols, unrelated graphics, watermarks, pasted crops, outlines, glow, shadow, bevel; no unrequested real identities, logos or ratings.
+
+This brief is model direction, not poster copy: never render its headings, labels, example words, or any skill name/author/version as visible text.

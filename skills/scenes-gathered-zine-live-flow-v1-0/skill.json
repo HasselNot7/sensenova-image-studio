@@ -1,0 +1,29 @@
+{
+  "id": "scenes-gathered-zine-live-flow-v1-0",
+  "order": 5,
+  "name": "拾景实况全流程",
+  "nameEn": "Gathered Scenes Zine Live Flow v1.0",
+  "shortDescription": "先按 v1.9 静态海报模块出一张成品，原文继续规定撕纸路径与实况照片打包；本工作台执行到出图为止",
+  "author": "Zeejay0",
+  "source": "https://github.com/Zeejay0/gathered-scenes-zine-skill",
+  "license": "Gathered Scenes Zine Personal Non-Commercial License v1.0",
+  "licenseFile": "_licenses/gathered-scenes-zine.txt",
+  "mode": "i2i",
+  "inputImages": {
+    "min": 1,
+    "max": 1
+  },
+  "promptParts": [
+    "SKILL.md",
+    "references/static-poster-v1-9/SKILL.md",
+    "references/static-poster-v1-9/references/text-material.md"
+  ],
+  "executionNote": "SKILL.md 全文直发，因此第 3–4 阶段（build_live_zip_and_import.py、实况照片导入器）也会作为文字一起交给模型，那边没有脚本可执行，只会影响措辞。",
+  "userNotePlaceholder": "撕纸想沿哪条线索展开，例如「沿山脊线从左下揭示到右上人脸」",
+  "tags": [
+    "实况照片",
+    "撕纸",
+    "全流程",
+    "纸刊"
+  ]
+}
