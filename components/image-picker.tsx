@@ -102,7 +102,7 @@ export function ImagePicker({
 
       <div className="flex flex-wrap items-end gap-4">
         <Slider
-          className="min-w-[240px] flex-1"
+          className="min-w-0 flex-1"
           isDisabled={isDisabled || loading || uncompressed}
           maxValue={policy.maxEdgeCeiling}
           minValue={512}

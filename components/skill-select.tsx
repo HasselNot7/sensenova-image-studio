@@ -32,11 +32,15 @@ export function SkillSelect({ isDisabled, limitUnit = "tokens", onChange, skills
         Skill（{skills.length} 个内置）
       </Label>
       <Select.Trigger>
-        <Select.Value>
+        {/* min-w-0 落在 .select__value 上：它默认 min-width:auto，会按整行文本撑开，
+            下面两个 truncate 段就永远缩不动，窄屏会把触发器顶出卡片 */}
+        <Select.Value className="min-w-0">
           {() => (
             <span className="flex min-w-0 items-baseline gap-2">
               <span className="truncate text-[13.5px] font-medium">{selected?.name ?? value}</span>
-              <span className="tech truncate text-[11.5px] text-muted">{selected?.nameEn}</span>
+              <span className="tech truncate text-[11.5px] text-muted max-sm:hidden">
+                {selected?.nameEn}
+              </span>
             </span>
           )}
         </Select.Value>

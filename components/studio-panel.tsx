@@ -565,7 +565,7 @@ export function StudioPanel({ model, onHistoryAdd, onModelChange, onSkillChange,
                         ? `${bodyChipLabel} · ${budget.chars} / ${tokenLimit} 字符`
                         : `${bodyChipLabel} · 估算 ${budget.tokens} / ${tokenLimit} token`}
                 </Chip>
-                <div className="ms-auto flex items-center gap-3">
+                <div className="ms-auto flex max-w-full flex-wrap items-center justify-end gap-2">
                   {noSkill ? null : (
                     <>
                       <SimpleSelect
@@ -575,24 +575,24 @@ export function StudioPanel({ model, onHistoryAdd, onModelChange, onSkillChange,
                         value={effectiveSource}
                         onChange={(value) => setSourceOverride(value as BodySource)}
                       />
-                      <Switch isSelected={distillOn} onChange={setDistillOn} isDisabled={busy}>
+                      <Switch className="shrink-0" isSelected={distillOn} onChange={setDistillOn} isDisabled={busy}>
                         <Switch.Content>
                           <Switch.Control>
                             <Switch.Thumb />
                           </Switch.Control>
-                          蒸馏后发送
+                          <span className="whitespace-nowrap">蒸馏后发送</span>
                         </Switch.Content>
                       </Switch>
                       {distillOn && distillHit ? (
                         <Button size="sm" variant="ghost" onPress={() => setDistillOn(false)}>
-                          用回源正文
+                          <span className="whitespace-nowrap">用回源正文</span>
                         </Button>
                       ) : null}
                     </>
                   )}
                   <Button size="sm" variant="tertiary" onPress={() => setBodyOpen(true)}>
                     <Eye />
-                    查看发送正文
+                    <span className="whitespace-nowrap">查看发送正文</span>
                   </Button>
                 </div>
               </div>
